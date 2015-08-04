@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace FireEngineRed\SmartyStreetsLaravel;
 
@@ -8,9 +8,9 @@ class SmartyStreetsLaravelServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        $this->publishes(array(
-            __DIR__.'/config.php' => config_path('smartystreets.php'),
-        ));
+        $source = realpath(__DIR__.'/config.php');
+		$this->publishes([$source => config_path('smartystreets.php')]);
+		$this->mergeConfigFrom($source, 'smartystreets');
     }
 
     public function register()

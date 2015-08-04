@@ -11,5 +11,11 @@
             "email": "scott.connerly@fire-engine-red.com"
         }
     ],
-    "minimum-stability": "dev"
+    "autoload": {
+        "psr-4": {
+            "FireEngineRed\\SmartyStreetsLaravel\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
