@@ -1,0 +1,15 @@
+{
+    "name": "fireenginered/smartystreets-laravel",
+    "description": "Laravel (PHP) SDK for using SmartyStreets geocoding.",
+    "require": {
+        "guzzlehttp/guzzle": "6.0.*"
+    },
+    "license": "GPL-2.0",
+    "authors": [
+        {
+            "name": "Scott A Connerly",
+            "email": "scott.connerly@fire-engine-red.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
