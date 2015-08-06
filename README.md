@@ -3,6 +3,18 @@ Laravel (PHP) SDK for using SmartyStreets geocoding.
 
 Only attempting Address Validation at this time; willing to accept pull requests that fill in the Zipcode Validation functionality too.
 
+Example Usage
+--------------
+
+```php
+$response = SmartyStreets::addressQuickVerify(array(
+    'street'=>'P.O. Box 1017',
+    'city'=>'Havertown',
+    'state'=>'PA',
+));
+```
+Further API details, including request and response fields, available at SmartyStreets: https://smartystreets.com/docs/address
+
 
 How to Install
 ---------------
