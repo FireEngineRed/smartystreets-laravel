@@ -24,7 +24,7 @@ How to Install
 1.  Install the `fireenginered/smartystreets-laravel` package
 
     ```shell
-    $ composer require smartystreets/smartystreets-laravel:dev-master
+    $ composer require fireenginered/smartystreets-laravel:dev-master
     ```
 
 1. Update `config/app.php` to activate SmartyStreets
