@@ -73,8 +73,14 @@ class SmartyStreetsService {
     {
         $candidates = array();
         foreach($this->response as $k => $candidate) {
-            if($candidate->input_index == $inputIndex) {
-                $candidates[] = (array)$candidate;
+            
+            $candidate = (array)$candidate;
+            $candidate['components'] = (array)$candidate['components'];
+            $candidate['metadata'] = (array)$candidate['metadata'];
+            $candidate['analysis'] = (array)$candidate['analysis'];
+            
+            if($candidate['input_index'] == $inputIndex) {
+                $candidates[] = $candidate;
             }
         }
         return $candidates;
