@@ -52,18 +52,22 @@ class SmartyStreetsService {
         }
         return false;
     }
-    
-    public function addressVerify() 
+
+    public function buildAddressVerifyUrl() 
     {
-        
         $path = '/street-address';
         $query = http_build_query( array(
             'auth-id' => Config::get('smartystreets.authId'),
             'auth-token' => Config::get('smartystreets.authToken'),
         ));
         
+        return $this->endpoint.$path.'/?'.$query;
+    }
+    
+    public function addressVerify() 
+    {
+        $url = $this->buildAddressVerifyUrl();
         $jsonRequest = json_encode($this->request);
-        $url = $this->endpoint.$path.'/?'.$query;
 
         $jsonResponse = $this->post($url, $jsonRequest);
         return $this->response = json_decode($jsonResponse);
