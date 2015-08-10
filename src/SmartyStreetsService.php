@@ -66,7 +66,7 @@ class SmartyStreetsService {
         $url = $this->endpoint.$path.'/?'.$query;
 
         $jsonResponse = $this->post($url, $jsonRequest);
-        $this->response = json_decode($jsonResponse);
+        return $this->response = json_decode($jsonResponse);
     }
     
     public function addressGetCandidates($inputIndex) 
