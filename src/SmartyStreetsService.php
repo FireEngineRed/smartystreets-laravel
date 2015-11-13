@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Config;
 
 class SmartyStreetsService {
 
-    public $reqeust;
+    public $request;
     public $response;
     public $endpoint;
     
