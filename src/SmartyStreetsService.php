@@ -70,7 +70,7 @@ class SmartyStreetsService {
         $jsonRequest = json_encode($this->request);
 
         $jsonResponse = $this->post($url, $jsonRequest);
-        return $this->response = json_decode($jsonResponse);
+        return $this->response = json_decode($jsonResponse, 1);
     }
     
     public function addressGetCandidates($inputIndex) 
@@ -78,11 +78,6 @@ class SmartyStreetsService {
         $candidates = array();
         if(!empty($this->response) && is_array($this->response)) {
             foreach($this->response as $k => $candidate) {
-                $candidate = (array)$candidate;
-                $candidate['components'] = (array)$candidate['components'];
-                $candidate['metadata'] = (array)$candidate['metadata'];
-                $candidate['analysis'] = (array)$candidate['analysis'];
-                
                 if($candidate['input_index'] == $inputIndex) {
                     $candidates[] = $candidate;
                 }
