@@ -76,16 +76,23 @@ class SmartyStreetsService {
     public function addressGetCandidates($inputIndex) 
     {
         $candidates = array();
-        foreach($this->response as $k => $candidate) {
-            
-            $candidate = (array)$candidate;
-            $candidate['components'] = (array)$candidate['components'];
-            $candidate['metadata'] = (array)$candidate['metadata'];
-            $candidate['analysis'] = (array)$candidate['analysis'];
-            
-            if($candidate['input_index'] == $inputIndex) {
-                $candidates[] = $candidate;
+        if(!empty($this->response) && is_array($this->response)) {
+            foreach($this->response as $k => $candidate) {
+                $candidate = (array)$candidate;
+                $candidate['components'] = (array)$candidate['components'];
+                $candidate['metadata'] = (array)$candidate['metadata'];
+                $candidate['analysis'] = (array)$candidate['analysis'];
+                
+                if($candidate['input_index'] == $inputIndex) {
+                    $candidates[] = $candidate;
+                }
             }
+        }
+        else {
+            Log::warning('Warning: No address candidates returned from SmartyStreets.');
+        }
+        if(empty($candidates)) {
+            Log::warning('Warning: No address candidates found for $inputIndex '.$inputIndex);
         }
         return $candidates;
     }
