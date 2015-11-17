@@ -13,6 +13,8 @@ $response = SmartyStreets::addressQuickVerify(array(
     'state'=>'PA',
 ));
 ```
+Methods are available (addressAddToRequest && addressGetCandidates) to check multiple addresses with one POST, but addressQuickVerify only handles one address at a time.
+
 Further API details, including request and response fields, available at SmartyStreets: https://smartystreets.com/docs/address
 
 
