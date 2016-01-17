@@ -2,20 +2,33 @@
 
 namespace FireEngineRed\SmartyStreetsLaravel;
 
-use App;
 use Log;
-use Illuminate\Support\Facades\Config;
+use Config;
 
 class SmartyStreetsService {
 
     public $request;
     public $response;
     public $endpoint;
+    public $curlFailureCallback;
+    protected $optionalRequestHeaders;
     
     public function __construct() 
     {
         $this->request = array();
         $this->endpoint = Config::get('smartystreets.endpoint');
+        
+        $this->curlFailureCallback = Config::get('smartystreets.curlFailureCallback');
+        $this->optionalRequestHeaders = Config::get('smartystreets.optionalRequestHeaders');
+    }
+    
+    public function setCurlFailureCallback($yourCallback) {
+        //can be set dynamically here, or set staticly in the config file. Anything that is_callable().
+        $this->curlFailureCallback = $yourCallback;
+    }
+    
+    public function setOptionalRequestHeader($k, $v) {
+        $this->optionalRequestHeaders[$k] = $v;
     }
     
     //only takes one address, and only returns the first candidate (if present)
@@ -35,9 +48,9 @@ class SmartyStreetsService {
     }
     
     public function validateAddressInputs($a) {
-        if(!empty($a['street']) && !empty($a['city']) && !empty($a['state']))
-            return true;
         if(!empty($a['street']) && !empty($a['zipcode']))
+            return true;
+        if(!empty($a['street']) && !empty($a['city']) && !empty($a['state']))
             return true;
 
         return false;
@@ -45,7 +58,12 @@ class SmartyStreetsService {
 
     public function addressAddToRequest($address) 
     {
-        if($this->validateAddressInputs($address)) {        
+        if($this->validateAddressInputs($address)) {
+            foreach($address as $k => $v) {
+                //must be proper data types or API says "400 Bad Request (Malformed Payload)"
+                if($k == 'candidates') $address[$k] = (int) $v;
+                else $address[$k] = (string) $v;
+            }
             $inputIndex = count($this->request);
             $this->request[] = $address;
             return $inputIndex;
@@ -69,8 +87,8 @@ class SmartyStreetsService {
         $url = $this->buildAddressVerifyUrl();
         $jsonRequest = json_encode($this->request);
 
-        $jsonResponse = $this->post($url, $jsonRequest);
-        return $this->response = json_decode($jsonResponse, 1);
+        $rawJsonResponseString = $this->post($url, $jsonRequest);
+        return $this->response = json_decode($rawJsonResponseString, 1);
     }
     
     public function addressGetCandidates($inputIndex) 
@@ -78,39 +96,50 @@ class SmartyStreetsService {
         $candidates = array();
         if(!empty($this->response) && is_array($this->response)) {
             foreach($this->response as $k => $candidate) {
-                if($candidate['input_index'] == $inputIndex) {
+                if(isset($candidate['input_index']) && $candidate['input_index'] == $inputIndex) {
                     $candidates[] = $candidate;
                 }
             }
         }
-        else {
-            Log::warning('Warning: No address candidates returned from SmartyStreets.');
-        }
         if(empty($candidates)) {
-            Log::warning('Warning: No address candidates found for $inputIndex '.$inputIndex);
+            Log::warning('Warning: No address candidates found for $inputIndex '.$inputIndex, $candidates);
         }
         return $candidates;
     }
     
     public function post($url, $postdata) {
         $ch = curl_init();
+        $httpHeaders = ['Content-Type: application/json'];
+        foreach($this->optionalRequestHeaders as $k => $v) {
+            if($v) {
+                $httpHeaders[] = "$k: true";
+            }
+        }
         $options = array(
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
             CURLOPT_HEADER => false,
+            CURLOPT_HTTPHEADER => $httpHeaders,
             CURLOPT_VERBOSE => false,
             CURLOPT_URL => $url,
             CURLOPT_POSTFIELDS => $postdata
         );
         curl_setopt_array($ch, $options);
-        $json_output = curl_exec($ch);
-/*
-        //For your debug purposes
-        Log::info("SmartyStreets cURL request: ", array($postdata));
-        Log::info("SmartyStreets cURL response meta: ",curl_getinfo($ch));
-        Log::info("SmartyStreets cURL response: ", array($json_output));
-*/
-        return trim($json_output);
+        $rawJsonResponseString = curl_exec($ch);
+        $curl_info = curl_getinfo($ch);
+        
+        if($curl_info['http_code'] == '200') {
+            return trim($rawJsonResponseString);
+        }
+        else {
+            if(is_callable($this->curlFailureCallback)) {
+                return call_user_func($this->curlFailureCallback, $postdata, $curl_info, $rawJsonResponseString);
+                /*  //maybe your callback includes something like this:
+                    Log::warning("SmartyStreets cURL failed!", [$postdata, $curl_info, $rawJsonResponseString]);
+                */
+            }
+            return false;
+        }
         /*
 Example parsed JSON:
             

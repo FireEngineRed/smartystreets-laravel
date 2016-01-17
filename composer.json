@@ -8,6 +8,10 @@
             "email": "scott.connerly@fire-engine-red.com"
         }
     ],
+    "require": {
+        "php": ">=5.5.0",
+        "illuminate/support": "5.*"
+    },
     "autoload": {
         "psr-4": {
             "FireEngineRed\\SmartyStreetsLaravel\\": "src/"
