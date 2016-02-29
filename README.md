@@ -35,7 +35,7 @@ How to Install
     # Add `SmartyStreetsLaravelServiceProvider` to the `providers` array
     'providers' => array(
         ...
-        'FireEngineRed\SmartyStreetsLaravel\SmartyStreetsLaravelServiceProvider',
+        'FireEngineRed\SmartyStreetsLaravel\SmartyStreetsServiceProvider',
     )
 
     # Add the `SmartyStreetsFacade` to the `aliases` array
