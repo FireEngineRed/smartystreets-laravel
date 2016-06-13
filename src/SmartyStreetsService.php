@@ -15,7 +15,7 @@ class SmartyStreetsService {
     
     public function __construct() 
     {
-        $this->request = array();
+        $this->request = [];
         $this->endpoint = Config::get('smartystreets.endpoint');
         
         $this->curlFailureCallback = Config::get('smartystreets.curlFailureCallback');
@@ -34,7 +34,7 @@ class SmartyStreetsService {
     //only takes one address, and only returns the first candidate (if present)
     public function addressQuickVerify($address) 
     {
-        $response = array();
+        $response = [];
         if($this->validateAddressInputs($address)) {
             $address['candidates'] = 1;
             $this->addressAddToRequest($address);
@@ -127,7 +127,9 @@ class SmartyStreetsService {
         curl_setopt_array($ch, $options);
         $rawJsonResponseString = curl_exec($ch);
         $curl_info = curl_getinfo($ch);
-        
+
+        $this->request = []; //reset the request for the next pass.
+
         if($curl_info['http_code'] == '200') {
             return trim($rawJsonResponseString);
         }
