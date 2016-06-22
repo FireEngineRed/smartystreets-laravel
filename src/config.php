@@ -18,7 +18,7 @@ return array(
 	|--------------------------------------------------------------------------
 	|
 	*/
-	'endpoint' => 'https://api.smartystreets.com',
+	'endpoint' => 'https://us-zipcode.api.smartystreets.com/lookup',
 	
 	/*
 	|--------------------------------------------------------------------------
