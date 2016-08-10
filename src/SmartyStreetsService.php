@@ -127,12 +127,11 @@ class SmartyStreetsService {
         curl_setopt_array($ch, $options);
         $rawJsonResponseString = curl_exec($ch);
         $rawJsonResponseString = trim($rawJsonResponseString);
-        $jsonDecoded = json_decode($rawJsonResponseString, 1);
         $curl_info = curl_getinfo($ch);
 
         $this->request = []; //reset the request for the next pass.
 
-        if($curl_info['http_code'] == '200' && strlen($rawJsonResponseString) && !empty($jsonDecoded)) {
+        if($curl_info['http_code'] == '200' && strlen($rawJsonResponseString)) {
             return $rawJsonResponseString;
         }
         else {
