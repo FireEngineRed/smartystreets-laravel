@@ -12,6 +12,7 @@ class SmartyStreetsService {
     public $endpoint;
     public $curlFailureCallback;
     protected $optionalRequestHeaders;
+    private $associatedIds;
     
     public function __construct() 
     {
@@ -32,12 +33,12 @@ class SmartyStreetsService {
     }
     
     //only takes one address, and only returns the first candidate (if present)
-    public function addressQuickVerify($address) 
+    public function addressQuickVerify($address, $associatedId = 0) 
     {
         $response = [];
         if($this->validateAddressInputs($address)) {
             $address['candidates'] = 1;
-            $this->addressAddToRequest($address);
+            $this->addressAddToRequest($address, $associatedId);
             $this->addressVerify();
             $candidates = $this->addressGetCandidates(0);
             if(!empty($candidates) && !empty($candidates[0])) {
@@ -56,7 +57,7 @@ class SmartyStreetsService {
         return false;
     }
 
-    public function addressAddToRequest($address) 
+    public function addressAddToRequest($address, $associatedId = 0) 
     {
         if($this->validateAddressInputs($address)) {
             foreach($address as $k => $v) {
@@ -66,6 +67,7 @@ class SmartyStreetsService {
             }
             $inputIndex = count($this->request);
             $this->request[] = $address;
+            $this->associatedIds[] = $associatedId;
             return $inputIndex;
         }
         return false;
@@ -102,7 +104,14 @@ class SmartyStreetsService {
             }
         }
         if(empty($candidates)) {
-            Log::warning('Warning: No address candidates found for $inputIndex '.$inputIndex, $candidates);
+            if(is_callable($this->failureCallback)) {
+                return call_user_func($this->failureCallback, 'candidates', [
+                    $inputIndex, $candidates, $this->associatedIds
+                ]);
+                /*  //maybe your callback includes something like this:
+                    Log::warning('Warning: No address candidates found for $inputIndex', [$inputIndex, $candidates]);
+                */
+            }
         }
         return $candidates;
     }
@@ -136,8 +145,10 @@ class SmartyStreetsService {
             return $rawJsonResponseString;
         }
         else {
-            if(is_callable($this->curlFailureCallback)) {
-                return call_user_func($this->curlFailureCallback, $postdata, $curl_info, $rawJsonResponseString);
+            if(is_callable($this->failureCallback)) {
+                return call_user_func($this->failureCallback, 'curl', [
+                    $postdata, $curl_info, $rawJsonResponseString, $this->associatedIds
+                ]);
                 /*  //maybe your callback includes something like this:
                     Log::warning("SmartyStreets cURL failed!", [$postdata, $curl_info, $rawJsonResponseString]);
                 */
