@@ -10,7 +10,7 @@ class SmartyStreetsService {
     public $request;
     public $response;
     public $endpoint;
-    public $curlFailureCallback;
+    public $failureCallback;
     protected $optionalRequestHeaders;
     private $associatedIds;
     
@@ -19,13 +19,13 @@ class SmartyStreetsService {
         $this->request = [];
         $this->endpoint = Config::get('smartystreets.endpoint');
         
-        $this->curlFailureCallback = Config::get('smartystreets.curlFailureCallback');
+        $this->failureCallback = Config::get('smartystreets.failureCallback');
         $this->optionalRequestHeaders = Config::get('smartystreets.optionalRequestHeaders');
     }
     
-    public function setCurlFailureCallback($yourCallback) {
+    public function setFailureCallback($yourCallback) {
         //can be set dynamically here, or set staticly in the config file. Anything that is_callable().
-        $this->curlFailureCallback = $yourCallback;
+        $this->failureCallback = $yourCallback;
     }
     
     public function setOptionalRequestHeader($k, $v) {
