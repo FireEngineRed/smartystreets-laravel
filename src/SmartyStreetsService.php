@@ -13,7 +13,7 @@ class SmartyStreetsService {
     public $failureCallback;
     protected $optionalRequestHeaders;
     private $associatedIds;
-    public $prev_request;
+    private $prev_request;
 
     public function __construct()
     {
