@@ -13,6 +13,7 @@ class SmartyStreetsService {
     public $failureCallback;
     protected $optionalRequestHeaders;
     private $associatedIds;
+    private $prev_request;
     
     public function __construct() 
     {
@@ -106,7 +107,7 @@ class SmartyStreetsService {
         if(empty($candidates)) {
             if(is_callable($this->failureCallback)) {
                 return call_user_func($this->failureCallback, 'candidates', [
-                    $inputIndex, $candidates, $this->associatedIds
+                    $inputIndex, $candidates, $this->associatedIds, $this->prev_request
                 ]);
                 /*  //maybe your callback includes something like this:
                     Log::warning('Warning: No address candidates found for $inputIndex', [$inputIndex, $candidates]);
@@ -139,6 +140,11 @@ class SmartyStreetsService {
         $jsonDecoded = json_decode($rawJsonResponseString, 1);
         $curl_info = curl_getinfo($ch);
 
+        /**
+         * save off request in case it's needed when we check
+         * for individual candidates in $this->addressGetCandidates()
+         */
+        $this->prev_request = $this->request;
         $this->request = []; //reset the request for the next pass.
 
         if($curl_info['http_code'] == '200' && strlen($rawJsonResponseString) && is_array($jsonDecoded)) {
@@ -147,7 +153,7 @@ class SmartyStreetsService {
         else {
             if(is_callable($this->failureCallback)) {
                 return call_user_func($this->failureCallback, 'curl', [
-                    $postdata, $curl_info, $rawJsonResponseString, $this->associatedIds
+                    $postdata, $curl_info, $rawJsonResponseString, $this->associatedIds, $this->prev_request
                 ]);
                 /*  //maybe your callback includes something like this:
                     Log::warning("SmartyStreets cURL failed!", [$postdata, $curl_info, $rawJsonResponseString]);
