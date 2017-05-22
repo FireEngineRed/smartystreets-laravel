@@ -107,7 +107,7 @@ class SmartyStreetsService {
         if(empty($candidates)) {
             if(is_callable($this->failureCallback)) {
                 return call_user_func($this->failureCallback, 'candidates', [
-                        $inputIndex, $candidates, $this->associatedIds, $this->prev_request
+                    $inputIndex, $candidates, $this->associatedIds, $this->prev_request
                 ]);
                 /*  //maybe your callback includes something like this:
                     Log::warning('Warning: No address candidates found for $inputIndex', [$inputIndex, $candidates]);
