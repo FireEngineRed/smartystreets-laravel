@@ -13,27 +13,28 @@ class SmartyStreetsService {
     public $failureCallback;
     protected $optionalRequestHeaders;
     private $associatedIds;
-    
-    public function __construct() 
+    public $prev_request;
+
+    public function __construct()
     {
         $this->request = [];
         $this->endpoint = Config::get('smartystreets.endpoint');
-        
+
         $this->failureCallback = Config::get('smartystreets.failureCallback');
         $this->optionalRequestHeaders = Config::get('smartystreets.optionalRequestHeaders');
     }
-    
+
     public function setFailureCallback($yourCallback) {
         //can be set dynamically here, or set staticly in the config file. Anything that is_callable().
         $this->failureCallback = $yourCallback;
     }
-    
+
     public function setOptionalRequestHeader($k, $v) {
         $this->optionalRequestHeaders[$k] = $v;
     }
-    
+
     //only takes one address, and only returns the first candidate (if present)
-    public function addressQuickVerify($address, $associatedId = 0) 
+    public function addressQuickVerify($address, $associatedId = 0)
     {
         $response = [];
         if($this->validateAddressInputs($address)) {
@@ -47,7 +48,7 @@ class SmartyStreetsService {
         }
         return $response;
     }
-    
+
     public function validateAddressInputs($a) {
         if(!empty($a['street']) && !empty($a['zipcode']))
             return true;
@@ -57,7 +58,7 @@ class SmartyStreetsService {
         return false;
     }
 
-    public function addressAddToRequest($address, $associatedId = 0) 
+    public function addressAddToRequest($address, $associatedId = 0)
     {
         if($this->validateAddressInputs($address)) {
             foreach($address as $k => $v) {
@@ -73,18 +74,18 @@ class SmartyStreetsService {
         return false;
     }
 
-    public function buildAddressVerifyUrl() 
+    public function buildAddressVerifyUrl()
     {
         $path = '/street-address';
         $query = http_build_query( array(
             'auth-id' => Config::get('smartystreets.authId'),
             'auth-token' => Config::get('smartystreets.authToken'),
         ));
-        
+
         return $this->endpoint.$path.'/?'.$query;
     }
-    
-    public function addressVerify() 
+
+    public function addressVerify()
     {
         $url = $this->buildAddressVerifyUrl();
         $jsonRequest = json_encode($this->request);
@@ -92,8 +93,8 @@ class SmartyStreetsService {
         $rawJsonResponseString = $this->post($url, $jsonRequest);
         return $this->response = json_decode($rawJsonResponseString, 1);
     }
-    
-    public function addressGetCandidates($inputIndex) 
+
+    public function addressGetCandidates($inputIndex)
     {
         $candidates = array();
         if(!empty($this->response) && is_array($this->response)) {
@@ -106,7 +107,7 @@ class SmartyStreetsService {
         if(empty($candidates)) {
             if(is_callable($this->failureCallback)) {
                 return call_user_func($this->failureCallback, 'candidates', [
-                    $inputIndex, $candidates, $this->associatedIds
+                    $inputIndex, $candidates, $this->prev_request
                 ]);
                 /*  //maybe your callback includes something like this:
                     Log::warning('Warning: No address candidates found for $inputIndex', [$inputIndex, $candidates]);
@@ -115,7 +116,7 @@ class SmartyStreetsService {
         }
         return $candidates;
     }
-    
+
     public function post($url, $postdata) {
         $ch = curl_init();
         $httpHeaders = ['Content-Type: application/json'];
@@ -139,6 +140,11 @@ class SmartyStreetsService {
         $jsonDecoded = json_decode($rawJsonResponseString, 1);
         $curl_info = curl_getinfo($ch);
 
+        /**
+         * save off request in case it's needed when we check
+         * for individual candidates in $this->addressGetCandidates()
+         */
+        $this->prev_request = $this->request;
         $this->request = []; //reset the request for the next pass.
 
         if($curl_info['http_code'] == '200' && strlen($rawJsonResponseString) && is_array($jsonDecoded)) {

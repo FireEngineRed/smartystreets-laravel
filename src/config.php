@@ -30,6 +30,31 @@ return array(
 	|
 	*/
 	'failureCallback' => null,
+    //'failureCallback' => function ($postdata, $info=[])
+    //{
+    //    if ($postdata == 'candidates')
+    //    {
+    //        Log::warning(
+    //            'Warning: No address candidates found for provided address',
+    //            [
+    //                isset($info[0]) ? $info[0] : null,
+    //                isset($info[1]) ? $info[1] : null,
+    //            ]
+    //        );
+    //    }
+    //    else
+    //    {
+    //        Log::warning(
+    //            "SmartyStreets cURL failed!",
+    //            [
+    //                isset($info[0]) ? $info[0] : null,
+    //                isset($info[1]) ? $info[1] : null,
+    //                isset($info[2]) ? $info[2] : null,
+    //                $postdata,
+    //            ]
+    //        );
+    //    }
+    //},
 
 	/*
 	|--------------------------------------------------------------------------
